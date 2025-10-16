@@ -40,22 +40,24 @@ public class Main {
         });
 
         client = ModbusTcpClient.create(transport);
-        try {
-            client.connect();
-        } catch (ModbusExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        reconnect();
     }
 
     private static void mainLoop() {
-        ReadHoldingRegistersResponse response;
-        try {
-            response = client.readHoldingRegisters(
-                    1,
-                    new ReadHoldingRegistersRequest(0, 5)
-            );
-        } catch (ModbusExecutionException | ModbusResponseException | ModbusTimeoutException e) {
-            throw new RuntimeException(e);
+        ReadHoldingRegistersResponse response = null;
+        while (response == null){
+            if (tick.get() % tickRate == 100){
+                try {
+                    response = client.readHoldingRegisters(
+                            1,
+                            new ReadHoldingRegistersRequest(0, 5)
+                    );
+                } catch (ModbusResponseException e) {
+                    throw new RuntimeException(e);
+                } catch (ModbusExecutionException | ModbusTimeoutException e) {
+                    reconnect();
+                }
+            }
         }
         byte[] registers = response.registers();
         StringBuilder string = new StringBuilder("Bytes: ");
@@ -74,12 +76,20 @@ public class Main {
 //            string.append(b1).append(", ");
         }
         LOGGER.info(string.toString());
+//        try {
+//            client.writeMultipleRegisters(
+//                    2,
+//                    new WriteMultipleRegistersRequest(2, 5, new byte[]{1, 2, 22, -123, 23, 0, 0, 0, 0, 0}));
+//        } catch (ModbusExecutionException | ModbusResponseException | ModbusTimeoutException e) {
+//            throw new RuntimeException(e);
+//        }
+    }
+
+    private static void reconnect() {
         try {
-            client.writeMultipleRegisters(
-                    2,
-                    new WriteMultipleRegistersRequest(2, 5, new byte[]{1, 2, 22, -123, 23, 0, 0, 0, 0, 0}));
-        } catch (ModbusExecutionException | ModbusResponseException | ModbusTimeoutException e) {
-            throw new RuntimeException(e);
+            client.connect();
+        } catch (ModbusExecutionException ignored) {
+
         }
     }
 }
