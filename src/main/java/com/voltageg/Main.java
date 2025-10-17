@@ -2,94 +2,70 @@ package com.voltageg;
 
 
 import com.digitalpetri.modbus.client.ModbusClient;
-import com.digitalpetri.modbus.client.ModbusTcpClient;
-import com.digitalpetri.modbus.exceptions.ModbusExecutionException;
-import com.digitalpetri.modbus.exceptions.ModbusResponseException;
-import com.digitalpetri.modbus.exceptions.ModbusTimeoutException;
-import com.digitalpetri.modbus.pdu.ReadHoldingRegistersRequest;
-import com.digitalpetri.modbus.pdu.ReadHoldingRegistersResponse;
-import com.digitalpetri.modbus.pdu.WriteMultipleRegistersRequest;
-import com.digitalpetri.modbus.tcp.client.NettyTcpClientTransport;
+import com.voltageg.sensors.Sensors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
 public class Main {
-    static boolean stop = false;
-    private static ModbusClient client;
-    static final Supplier<Long> tick = System::currentTimeMillis;
-    static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-    private static final int tickRate = 500;
+    public static boolean stop = false;
+    public static ModbusClient client;
+    public static final Supplier<Long> tick = System::currentTimeMillis;
+    public static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    public static final int tickRate = 50;
 
+
+    static boolean ticked = false;
     public static void main(String[] args) {
         init();
         while (!stop) {
-            if (tick.get() % tickRate == 0 )
-                mainLoop();
+            if (tick.get() % tickRate == 0) {
+                if (!ticked) {
+                    tickLoop();
+                    ticked = true;
+                }
+            } else ticked = false;
+            mainLoop();
         }
 
-    }
-
-
-
-    private static void init() {
-        var transport = NettyTcpClientTransport.create(cfg -> {
-            cfg.setHostname("DESKTOP-UU22OM8");
-            cfg.setPort(502);
-        });
-
-        client = ModbusTcpClient.create(transport);
-        reconnect();
     }
 
     private static void mainLoop() {
-        ReadHoldingRegistersResponse response = null;
-        while (response == null){
-            if (tick.get() % tickRate == 100){
-                try {
-                    response = client.readHoldingRegisters(
-                            1,
-                            new ReadHoldingRegistersRequest(0, 5)
-                    );
-                } catch (ModbusResponseException e) {
-                    throw new RuntimeException(e);
-                } catch (ModbusExecutionException | ModbusTimeoutException e) {
-                    reconnect();
-                }
-            }
-        }
-        byte[] registers = response.registers();
-        StringBuilder string = new StringBuilder("Bytes: ");
-        for (int i = 0; i < registers.length; i=i+2) {
-            int b = registers[i];
-            int b1 = registers[i+1];
-            if (b<0) b = 256+b;
-            if (b1<0) b1 = 256+b1;
-            string.append((b<<8)+b1).append(", ");
 
-//            if (b<9) string.append(0);
-//            if (b<99) string.append(0);
-//            string.append(b).append(":");
-//            if (b1<9) string.append(0);
-//            if (b1<99) string.append(0);
-//            string.append(b1).append(", ");
-        }
-        LOGGER.info(string.toString());
-//        try {
-//            client.writeMultipleRegisters(
-//                    2,
-//                    new WriteMultipleRegistersRequest(2, 5, new byte[]{1, 2, 22, -123, 23, 0, 0, 0, 0, 0}));
-//        } catch (ModbusExecutionException | ModbusResponseException | ModbusTimeoutException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
-    private static void reconnect() {
-        try {
-            client.connect();
-        } catch (ModbusExecutionException ignored) {
 
-        }
+    private static void init() {
+        //Client.runTCPClient();
+        //Client.runRTUClient();
+        Client.runRTUOverTCPClient();
     }
+
+
+
+    private static void tickLoop() {
+        int[] response = Sensors.TEMPERATURE_HUMIDITY.readData();
+
+        int temperature = response[0];
+        int humidity = response[1];
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i <= 19; i++) {
+            if (i == temperature) builder.append("T");
+            else builder.append(".");
+        }
+        LOGGER.info(builder.toString());
+        builder = new StringBuilder();
+        for (int i = 0; i <= 19; i++) {
+            if (i == humidity) builder.append("H");
+            else builder.append(".");
+        }
+        LOGGER.info(builder.toString());
+//        LOGGER.info("Data:");
+//        LOGGER.info("   Temperature: {}", response[0]);
+//        LOGGER.info("   Humidity: {}", response[1]);
+
+    }
+
+
 }
