@@ -1,6 +1,5 @@
 package com.voltageg;
 
-import com.digitalpetri.modbus.client.ModbusClient;
 import com.digitalpetri.modbus.exceptions.ModbusExecutionException;
 import com.digitalpetri.modbus.exceptions.ModbusResponseException;
 import com.digitalpetri.modbus.exceptions.ModbusTimeoutException;
@@ -9,11 +8,10 @@ import com.digitalpetri.modbus.pdu.ReadHoldingRegistersResponse;
 import com.digitalpetri.modbus.pdu.WriteMultipleRegistersRequest;
 import com.digitalpetri.modbus.pdu.WriteMultipleRegistersResponse;
 
-import static com.voltageg.Main.*;
+import static com.voltageg.Client.client;
 
 
-public class Register {
-    static ModbusClient modbusServices = client;
+public class MasterRegisterUtils {
 
     public static void writeRegistries(int unitID,int quantity,int[] data) {
         byte[] toWrite = new byte[quantity*2];

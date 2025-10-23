@@ -1,6 +1,7 @@
 package com.voltageg.sensors;
 
-import com.voltageg.Register;
+import com.voltageg.MasterRegisterUtils;
+import com.voltageg.SlaveRegisterUtils;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -30,10 +31,10 @@ public enum Sensors {
             d += Math.abs(pair.getFirst());
             toWrite[i] = d;
         }
-        Register.writeRegistries(this.unitID,data.length,toWrite);
+        SlaveRegisterUtils.writeRegistries(this.unitID,data.length,toWrite);
     }
     public int[] readData() {
-        int[] data = Register.readRegisters(this.unitID,this.sensorData.measurements().size());
+        int[] data = MasterRegisterUtils.readRegisters(this.unitID,this.sensorData.measurements().size());
         int[] toReturn = new int[data.length];
         for (int i = 0; i < data.length; i++) {
             Pair pair = this.sensorData.measurements().get(i);

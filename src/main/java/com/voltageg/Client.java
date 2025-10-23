@@ -1,5 +1,6 @@
 package com.voltageg;
 
+import com.digitalpetri.modbus.client.ModbusClient;
 import com.digitalpetri.modbus.client.ModbusRtuClient;
 import com.digitalpetri.modbus.client.ModbusTcpClient;
 import com.digitalpetri.modbus.exceptions.ModbusExecutionException;
@@ -8,9 +9,8 @@ import com.digitalpetri.modbus.tcp.client.NettyRtuClientTransport;
 import com.digitalpetri.modbus.tcp.client.NettyTcpClientTransport;
 import com.fazecast.jSerialComm.SerialPort;
 
-import static com.voltageg.Main.client;
-
 public class Client {
+    public static ModbusClient client;
     public static void runTCPClient() {
         var transport = NettyTcpClientTransport.create(cfg -> {
             cfg.setHostname("127.0.0.1");
