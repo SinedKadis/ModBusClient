@@ -1,4 +1,4 @@
-package com.voltageg;
+package com.voltageg.registers;
 
 import com.digitalpetri.modbus.exceptions.ModbusExecutionException;
 import com.digitalpetri.modbus.exceptions.ModbusResponseException;
@@ -7,8 +7,9 @@ import com.digitalpetri.modbus.pdu.ReadHoldingRegistersRequest;
 import com.digitalpetri.modbus.pdu.ReadHoldingRegistersResponse;
 import com.digitalpetri.modbus.pdu.WriteMultipleRegistersRequest;
 import com.digitalpetri.modbus.pdu.WriteMultipleRegistersResponse;
+import com.voltageg.Master;
 
-import static com.voltageg.Client.client;
+import static com.voltageg.Master.client;
 
 
 public class MasterRegisterUtils {
@@ -31,7 +32,7 @@ public class MasterRegisterUtils {
             } catch (ModbusExecutionException |ModbusResponseException e) {
                 throw new RuntimeException(e);
             } catch (ModbusTimeoutException e) {
-                Client.reconnect();
+                Master.reconnect();
             }
         }
     }
@@ -48,7 +49,7 @@ public class MasterRegisterUtils {
                 } catch (ModbusExecutionException | ModbusResponseException e) {
                     throw new RuntimeException(e);
                 } catch (ModbusTimeoutException e) {
-                    Client.reconnect();
+                    Master.reconnect();
                 }
 
         }

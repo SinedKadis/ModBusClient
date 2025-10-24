@@ -1,14 +1,15 @@
-package com.voltageg;
+package com.voltageg.registers;
 
 import com.digitalpetri.modbus.exceptions.UnknownUnitIdException;
 import com.digitalpetri.modbus.pdu.ReadHoldingRegistersRequest;
 import com.digitalpetri.modbus.pdu.ReadHoldingRegistersResponse;
 import com.digitalpetri.modbus.pdu.WriteMultipleRegistersRequest;
 import com.digitalpetri.modbus.server.ReadWriteModbusServices;
+import com.voltageg.Slave;
 
 
 public class SlaveRegisterUtils {
-    static ReadWriteModbusServices modbusServices = Server.modbusServices;
+    static ReadWriteModbusServices modbusServices = Slave.modbusServices;
 
     public static void writeRegistries(int unitID,int quantity,int[] data) {
         byte[] toWrite = new byte[quantity*2];

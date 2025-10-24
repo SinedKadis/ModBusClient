@@ -5,12 +5,19 @@ import com.digitalpetri.modbus.server.*;
 import com.digitalpetri.modbus.tcp.server.NettyRtuServerTransport;
 import com.digitalpetri.modbus.tcp.server.NettyTcpServerTransport;
 import com.fazecast.jSerialComm.SerialPort;
+import com.voltageg.threads.SlaveThread;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class Server {
+public class Slave {
+
+    public static void main(String[] args) {
+        Thread slave = new SlaveThread();
+        slave.start();
+    }
+
     private static final String bindAddress = "127.0.0.1";
     private static final List<ProcessImage> processImages = new ArrayList<>();
 
@@ -24,7 +31,7 @@ public class Server {
         }
     };
 
-    public static ModbusServer startRTUServer() {
+    public static void startRTUServer() {
         var transport = SerialPortServerTransport.create(cfg -> {
             cfg.setSerialPort("/dev/ttyUSB0");
             cfg.setBaudRate(115200);
@@ -38,10 +45,9 @@ public class Server {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return server;
     }
 
-    public static ModbusServer startTCPServer() {
+    public static void startTCPServer() {
         var transport = NettyTcpServerTransport.create(cfg -> {
             cfg.setBindAddress(bindAddress);
             cfg.setPort(502);
@@ -52,10 +58,9 @@ public class Server {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return server;
     }
 
-    public static ModbusServer startRTUOverTCPSlave() {
+    public static void startRTUOverTCPSlave() {
         var transport = NettyRtuServerTransport.create(cfg -> {
             cfg.setBindAddress(bindAddress);
             cfg.setPort(502);
@@ -68,6 +73,5 @@ public class Server {
             throw new RuntimeException(e);
         }
 
-        return server;
     }
 }

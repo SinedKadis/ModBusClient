@@ -8,8 +8,13 @@ import com.digitalpetri.modbus.serial.client.SerialPortClientTransport;
 import com.digitalpetri.modbus.tcp.client.NettyRtuClientTransport;
 import com.digitalpetri.modbus.tcp.client.NettyTcpClientTransport;
 import com.fazecast.jSerialComm.SerialPort;
+import com.voltageg.threads.MasterThread;
 
-public class Client {
+public class Master {
+    public static void main(String[] args) {
+        Thread master = new MasterThread();
+        master.start();
+    }
     public static ModbusClient client;
     public static void runTCPClient() {
         var transport = NettyTcpClientTransport.create(cfg -> {

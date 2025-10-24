@@ -1,7 +1,7 @@
 package com.voltageg.sensors;
 
-import com.voltageg.MasterRegisterUtils;
-import com.voltageg.SlaveRegisterUtils;
+import com.voltageg.registers.MasterRegisterUtils;
+import com.voltageg.registers.SlaveRegisterUtils;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public enum Sensors {
         this.sensorData = sensorData;
     }
 
-    public void writeData(int... data) {
+    public void writeData(boolean isMaster, int... data) {
         if (this.sensorData.measurements().size() < data.length){
             throw new RuntimeException("To many data:"+ Arrays.toString(data));
         }
@@ -31,10 +31,17 @@ public enum Sensors {
             d += Math.abs(pair.getFirst());
             toWrite[i] = d;
         }
-        SlaveRegisterUtils.writeRegistries(this.unitID,data.length,toWrite);
+        if (isMaster)
+            MasterRegisterUtils.writeRegistries(this.unitID,data.length,toWrite);
+        else
+            SlaveRegisterUtils.writeRegistries(this.unitID,data.length,toWrite);
     }
-    public int[] readData() {
-        int[] data = MasterRegisterUtils.readRegisters(this.unitID,this.sensorData.measurements().size());
+    public int[] readData(boolean isMaster) {
+        int[] data;
+        if (isMaster)
+            data = MasterRegisterUtils.readRegisters(this.unitID,this.sensorData.measurements().size());
+        else
+            data = SlaveRegisterUtils.readRegisters(this.unitID,this.sensorData.measurements().size());
         int[] toReturn = new int[data.length];
         for (int i = 0; i < data.length; i++) {
             Pair pair = this.sensorData.measurements().get(i);
